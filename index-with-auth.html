@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#f0ebe0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="LiftTrack"/>
+<title>LiftTrack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* ── Warm Premium Palette (from reference screenshots) ── */
+  --bg:#f0ebe0;          /* parchment cream background */
+  --bg2:#e8e2d5;         /* slightly deeper cream */
+  --sf:#faf7f2;          /* card/surface white-cream */
+  --sf2:#f0ebe0;         /* nested surface */
+  --sf3:#e4ddd0;         /* pressed state */
+  --bd:#d6cfc2;          /* warm border */
+  --bd2:#c8c0b0;         /* stronger border */
+  --ink:#1a1208;         /* near-black warm ink */
+  --ink2:#3d3020;        /* secondary text dark brown */
+  --ink3:#7a6e5e;        /* muted warm text */
+  --ink4:#a89f92;        /* placeholder/disabled */
+  --gold:#b8860b;        /* deep gold accent */
+  --gold2:#d4a017;       /* lighter gold */
+  --gold-bg:rgba(184,134,11,.08);
+  --gold-bd:rgba(184,134,11,.25);
+  --green:#1a6b3c;       /* deep forest green */
+  --green2:#2d9c5a;
+  --gbg:rgba(26,107,60,.07);
+  --gbd:rgba(26,107,60,.25);
+  --red:#8b1a1a;         /* deep burgundy red */
+  --red2:#c0392b;
+  --rbg:rgba(139,26,26,.07);
+  --rbd:rgba(139,26,26,.22);
+  --amber:#7a4800;       /* deep amber */
+  --amber2:#b05c00;
+  --abg:rgba(122,72,0,.07);
+  --abd:rgba(122,72,0,.22);
+  --dark:#18120a;        /* dark card (stat cards) */
+  --dark2:#231b0f;
+  --dark3:#2e2416;
+  --r:14px;--rs:10px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --font-head:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);font-size:14px;
+  overflow-x:hidden;min-height:100dvh;
+}
+button{border:none;cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+.sh::-webkit-scrollbar{display:none}
+.sh{-ms-overflow-style:none;scrollbar-width:none}
+#app{min-height:100dvh;display:flex;flex-direction:column}
+
+/* ─── AUTH SCREEN ─── */
+#auth-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;padding:24px;
+}
+.auth-card{
+  width:100%;max-width:380px;
+  background:var(--sf);
+  border:1px solid var(--bd2);
+  border-radius:20px;
+  padding:38px 30px 32px;
+  text-align:center;
+  box-shadow:0 8px 40px rgba(26,18,8,.12), 0 2px 8px rgba(26,18,8,.06);
+}
+.auth-logo{
+  width:60px;height:60px;border-radius:16px;
+  background:var(--dark);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+  box-shadow:0 6px 20px rgba(26,18,8,.3);
+  font-family:var(--font-head);font-weight:800;font-size:24px;color:var(--gold2);
+  letter-spacing:-.5px;
+}
+.auth-title{
+  font-family:var(--font-head);font-size:28px;font-weight:800;
+  color:var(--ink);margin-bottom:8px;letter-spacing:-.5px;
+}
+.auth-sub{font-size:13px;color:var(--ink3);margin-bottom:32px;line-height:1.65}
+.auth-divider{display:flex;align-items:center;gap:12px;margin-bottom:18px;color:var(--ink4);font-size:11px;letter-spacing:.5px;text-transform:uppercase}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bd)}
+.google-btn{
+  width:100%;padding:14px 20px;border-radius:12px;
+  background:var(--bg);border:1.5px solid var(--bd2);
+  color:var(--ink);font-size:14px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all .2s;cursor:pointer;
+  box-shadow:0 2px 6px rgba(26,18,8,.06);
+}
+.google-btn:hover{background:var(--sf3);border-color:var(--gold);box-shadow:0 4px 16px rgba(26,18,8,.1)}
+.google-btn:active{transform:scale(.97)}
+.auth-footer{margin-top:20px;font-size:11px;color:var(--ink4);line-height:1.6}
+.auth-error{margin-top:14px;padding:10px 14px;background:var(--rbg);border:1px solid var(--rbd);border-radius:10px;font-size:13px;color:var(--red);display:none}
+.auth-loading{display:none;align-items:center;gap:10px;color:var(--ink3);font-size:13px;justify-content:center;margin-top:14px}
+.spinner{width:18px;height:18px;border:2px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── SYNC BAR ─── */
+.sync-bar{height:2px;background:linear-gradient(90deg,var(--gold),var(--green2));position:fixed;top:0;left:0;z-index:200;width:0;transition:width .3s,opacity .3s}
+.sync-bar.active{width:100%;opacity:1}
+.sync-bar.done{width:100%;opacity:0}
+
+/* ─── HEADER ─── */
+.hdr{
+  background:var(--sf);
+  border-bottom:1.5px solid var(--bd);
+  padding:calc(var(--st) + 10px) 16px 10px;
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:100;min-height:52px;
+}
+.hdr-logo{
+  width:32px;height:32px;border-radius:9px;
+  background:var(--dark);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-weight:800;font-size:15px;
+  color:var(--gold2);flex-shrink:0;
+}
+.hdr-title{
+  font-family:var(--font-head);font-weight:700;font-size:17px;
+  letter-spacing:-.3px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;
+}
+.back-btn{
+  background:var(--bg2);border:1.5px solid var(--bd2);color:var(--ink2);
+  padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;flex-shrink:0;
+}
+.hdr-user{width:30px;height:30px;border-radius:50%;border:2px solid var(--bd2);object-fit:cover;cursor:pointer;flex-shrink:0}
+.hdr-user-init{
+  width:30px;height:30px;border-radius:50%;background:var(--dark);
+  border:1px solid var(--dark2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--gold2);cursor:pointer;flex-shrink:0;
+  font-family:var(--font-head);
+}
+
+/* ─── USER MENU ─── */
+.user-menu{
+  position:fixed;top:52px;right:8px;z-index:300;
+  background:var(--sf);border:1.5px solid var(--bd2);border-radius:14px;
+  padding:8px;min-width:200px;
+  box-shadow:0 12px 40px rgba(26,18,8,.15);
+  opacity:0;pointer-events:none;transform:translateY(-8px);
+  transition:all .2s;
+}
+.user-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.user-menu-name{
+  padding:8px 12px;font-size:13px;font-weight:600;color:var(--ink);
+  border-bottom:1px solid var(--bd);margin-bottom:4px;font-family:var(--font-head);
+}
+.user-menu-email{font-size:11px;color:var(--ink3);font-weight:400;display:block;margin-top:1px}
+.user-menu-btn{
+  width:100%;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:600;
+  color:var(--red);background:none;cursor:pointer;text-align:left;transition:background .15s;
+}
+.user-menu-btn:hover{background:var(--rbg)}
+
+/* ─── BOTTOM NAV ─── */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--sf);border-top:1.5px solid var(--bd);
+  display:flex;z-index:90;padding-bottom:var(--sb);
+}
+.bnav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 4px;font-size:10px;font-weight:600;
+  color:var(--ink4);background:none;gap:3px;cursor:pointer;transition:color .2s;
+  letter-spacing:.4px;text-transform:uppercase;
+}
+.bnav-btn.active{color:var(--green)}
+.bnav-btn.active .bnav-icon-wrap{background:var(--gbg);border-color:var(--gbd)}
+.bnav-icon-wrap{
+  width:36px;height:24px;display:flex;align-items:center;justify-content:center;
+  border-radius:12px;border:1px solid transparent;transition:all .2s;
+}
+.bnav-icon{font-size:17px;line-height:1}
+
+/* ─── PAGES ─── */
+.page{display:none;overflow-y:auto;padding-bottom:calc(70px + var(--sb) + 16px)}
+.page.active{display:block}
+
+/* ─── STATS GRID ─── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:16px}
+.sc{
+  border-radius:var(--r);padding:16px 14px;
+  display:flex;flex-direction:column;gap:6px;
+  background:var(--dark);
+  position:relative;overflow:hidden;
+  border:1px solid var(--dark3);
+}
+.sc::after{
+  content:'';position:absolute;top:-30%;right:-15%;
+  width:100px;height:100px;border-radius:50%;opacity:.2;filter:blur(20px);
+}
+.sc.blue::after{background:#4a7fff}
+.sc.red::after{background:#c04040}
+.sc.amber::after{background:#c07000}
+.sc.green::after{background:#30a060}
+.sc-icon{font-size:20px;opacity:.7}
+.sc-num{
+  font-family:var(--font-head);font-size:34px;font-weight:800;
+  color:var(--gold2);line-height:1;
+  font-style:italic;
+}
+.sc-lbl{font-size:11px;color:rgba(255,255,255,.5);font-weight:500;letter-spacing:.3px}
+
+/* ─── FILTER TABS ─── */
+.ftabs{display:flex;gap:6px;overflow-x:auto;padding:4px 16px 12px;-ms-overflow-style:none;scrollbar-width:none}
+.ftabs::-webkit-scrollbar{display:none}
+.ftab{
+  flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--bd);background:var(--sf);color:var(--ink3);cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.ftab.active{background:var(--dark);color:var(--gold2);border-color:var(--dark)}
+
+/* ─── ORDER CARDS ─── */
+.olist{padding:0 16px;display:flex;flex-direction:column;gap:10px}
+.ocard{
+  background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);
+  padding:15px;cursor:pointer;transition:all .2s;
+  position:relative;overflow:hidden;
+}
+.ocard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--bd2);transition:background .2s}
+.ocard[data-status="IN PROGRESS"]::before{background:var(--green2)}
+.ocard[data-status="BLOCKED"]::before{background:var(--red2)}
+.ocard[data-status="READY FOR HANDOVER"]::before{background:var(--gold)}
+.ocard[data-status="COMPLETED"]::before{background:var(--green)}
+.ocard:active{background:var(--sf3)}
+.ocard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.oname{font-family:var(--font-head);font-weight:700;font-size:15px;letter-spacing:-.2px;color:var(--ink)}
+.ometa{font-size:11px;color:var(--ink4);margin-top:3px}
+.ohand{font-size:11px;color:var(--ink3);margin-top:6px}
+
+/* ─── PROGRESS ─── */
+.pw{margin-top:2px}
+.pl{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-bottom:5px}
+.pt{height:5px;background:var(--bd);border-radius:3px;overflow:hidden}
+.pf{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.pf.blue{background:var(--green2)}
+.pf.green{background:var(--green)}
+.pf.red{background:var(--red2)}
+.pf.amber{background:var(--gold)}
+.pf.gray{background:var(--bd2)}
+
+/* ─── BADGES ─── */
+.badge{
+  display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px;
+}
+.b-NEW{background:var(--sf3);color:var(--ink3);border:1px solid var(--bd)}
+.b-IP{background:var(--gbg);color:var(--green);border:1px solid var(--gbd)}
+.b-BL{background:var(--rbg);color:var(--red);border:1px solid var(--rbd)}
+.b-RH{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd)}
+.b-CO{background:var(--gbg);color:var(--green);border:1px solid var(--gbd)}
+.b-ns{background:var(--sf3);color:var(--ink4);border:1px solid var(--bd)}
+.b-ip{background:var(--gbg);color:var(--green);border:1px solid var(--gbd)}
+.b-bl{background:var(--rbg);color:var(--red);border:1px solid var(--rbd)}
+.b-co{background:var(--gbg);color:var(--green);border:1px solid var(--gbd)}
+
+/* ─── FAB ─── */
+.fab{
+  position:fixed;bottom:calc(70px + var(--sb) + 14px);right:18px;
+  width:52px;height:52px;border-radius:26px;
+  background:var(--dark);
+  color:var(--gold2);font-size:26px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 24px rgba(26,18,8,.25);z-index:89;
+  transition:transform .15s,box-shadow .15s;
+  border:1px solid var(--dark3);
+}
+.fab:active{transform:scale(.9);box-shadow:0 2px 10px rgba(26,18,8,.15)}
+
+/* ─── ORDER DETAIL ─── */
+.ohdr{padding:18px 16px;background:var(--sf);border-bottom:1.5px solid var(--bd)}
+.ohdr h1{font-family:var(--font-head);font-size:21px;font-weight:800;margin-bottom:3px;letter-spacing:-.4px;color:var(--ink)}
+.ometa2{font-size:12px;color:var(--ink4);margin-bottom:2px}
+.ocontact{font-size:12px;color:var(--ink3);margin-bottom:2px}
+.arow{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.abtn{
+  flex:1;min-width:68px;padding:9px 6px;border-radius:10px;
+  font-size:12px;font-weight:600;text-align:center;cursor:pointer;transition:all .15s;
+}
+.abtn:active{opacity:.7}
+.abtn.edit{background:var(--bg2);color:var(--ink2);border:1.5px solid var(--bd)}
+.abtn.msg{background:var(--gbg);color:var(--green);border:1.5px solid var(--gbd)}
+.abtn.dup{background:var(--gold-bg);color:var(--gold);border:1.5px solid var(--gold-bd)}
+.abtn.arch{background:var(--bg2);color:var(--ink3);border:1.5px solid var(--bd)}
+
+/* ─── TRACKS ─── */
+.thdr{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 8px}
+.thdr h2{font-family:var(--font-head);font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--ink)}
+.tscroll{display:flex;gap:10px;overflow-x:auto;padding:0 16px 12px}
+.tscroll::-webkit-scrollbar{display:none}
+.tcard{
+  flex-shrink:0;width:176px;
+  background:var(--sf);border:1.5px solid var(--bd);
+  border-radius:var(--r);padding:12px;cursor:pointer;transition:all .2s;
+}
+.tcard.sel{border-color:var(--green);box-shadow:0 0 0 3px var(--gbg)}
+.tcard.sel-bl{border-color:var(--red2);box-shadow:0 0 0 3px var(--rbg)}
+.tcard.sel-co{border-color:var(--green);box-shadow:0 0 0 3px var(--gbg)}
+.tcard:active{background:var(--sf3)}
+.tname{font-size:12px;font-weight:600;line-height:1.3;margin-bottom:8px;min-height:30px;color:var(--ink);font-family:var(--font-head)}
+.tpct{font-size:10px;color:var(--ink3);margin-top:5px;display:flex;justify-content:space-between;align-items:center}
+.add-tcard{
+  flex-shrink:0;width:110px;background:transparent;
+  border:1.5px dashed var(--bd2);border-radius:var(--r);padding:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--ink4);font-size:12px;font-weight:600;transition:all .2s;
+}
+.add-tcard:active{border-color:var(--green);color:var(--green)}
+
+/* ─── STAGES ─── */
+.ssec{padding:0 16px;margin-top:4px}
+.sshdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sstitle{font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:-.2px;color:var(--ink)}
+.sdtrack{font-size:11px;color:var(--red);font-weight:600;background:none;padding:4px 8px;cursor:pointer}
+.slist{background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.sitem{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--bd)}
+.sitem:last-child{border-bottom:none}
+.sitem.done-row{background:var(--gbg)}
+.snum{font-size:10px;color:var(--ink4);width:18px;text-align:right;flex-shrink:0}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sdot.ns{background:var(--bd2)}.sdot.ip{background:var(--green2)}.sdot.bl{background:var(--red2)}.sdot.co{background:var(--green)}
+.stext{flex:1;font-size:13px;line-height:1.3;color:var(--ink)}
+.stext.done{text-decoration:line-through;color:var(--ink4)}
+.ssel{
+  background:var(--bg2);border:1px solid var(--bd);color:var(--ink);
+  border-radius:8px;padding:4px 6px;font-size:11px;font-weight:600;
+  flex-shrink:0;max-width:96px;cursor:pointer;
+}
+.sdel{color:var(--ink4);font-size:18px;line-height:1;background:none;flex-shrink:0;padding:2px 4px;cursor:pointer}
+.sdel:active{color:var(--red)}
+.add-srow{padding:9px 14px;background:var(--bg2);display:flex;gap:8px;align-items:center;border-top:1px solid var(--bd)}
+.add-sinp{flex:1;background:var(--sf);border:1.5px solid var(--bd);color:var(--ink);border-radius:8px;padding:7px 10px;font-size:13px}
+.add-sinp:focus{outline:none;border-color:var(--green)}
+.add-sbtn{background:var(--dark);color:var(--gold2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+.add-scan{background:none;color:var(--ink4);font-size:18px;padding:4px 6px;cursor:pointer}
+.add-strig{padding:10px 14px;color:var(--green);font-size:12px;font-weight:600;background:none;display:block;width:100%;text-align:left;cursor:pointer;border:none}
+.atform{margin:0 16px 10px;background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);padding:12px}
+.atrow{display:flex;gap:8px;margin-bottom:8px}
+.atchk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3)}
+input[type="checkbox"]{accent-color:var(--green);width:14px;height:14px}
+
+/* ─── MODALS ─── */
+.modal-ov{
+  position:fixed;inset:0;background:rgba(26,18,8,.55);
+  z-index:200;display:flex;align-items:flex-end;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal-box{
+  background:var(--sf);border-radius:22px 22px 0 0;
+  border-top:1.5px solid var(--bd2);
+  width:100%;max-height:93dvh;overflow-y:auto;
+  padding:20px 18px calc(20px + var(--sb));
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.modal-ov.open .modal-box{transform:translateY(0)}
+.modal-title{
+  font-family:var(--font-head);font-size:18px;font-weight:800;letter-spacing:-.3px;
+  color:var(--ink);margin-bottom:18px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-close{
+  background:var(--bg2);border:1.5px solid var(--bd);color:var(--ink3);
+  width:30px;height:30px;border-radius:50%;font-size:15px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+
+/* ─── FORMS ─── */
+.fg{margin-bottom:13px}
+.flbl{display:block;font-size:10px;font-weight:700;color:var(--ink3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
+.finp{
+  width:100%;background:var(--bg);border:1.5px solid var(--bd);color:var(--ink);
+  border-radius:10px;padding:10px 13px;font-size:14px;transition:border-color .2s;
+}
+.finp:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--gbg)}
+.finp::placeholder{color:var(--ink4)}
+textarea.finp{resize:vertical;min-height:90px}
+select.finp{cursor:pointer}
+.btn-pri{
+  width:100%;background:var(--dark);color:var(--gold2);
+  padding:13px;border-radius:11px;font-size:14px;font-weight:700;
+  font-family:var(--font-head);letter-spacing:.2px;
+  transition:opacity .15s,transform .1s;margin-top:6px;cursor:pointer;border:none;
+  box-shadow:0 4px 16px rgba(26,18,8,.2);
+}
+.btn-pri:active{opacity:.85;transform:scale(.98)}.btn-pri:disabled{opacity:.4;box-shadow:none}
+.btn-sec{background:var(--bg2);border:1.5px solid var(--bd);color:var(--ink2);padding:11px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
+.btn-danger{background:var(--rbg);border:1.5px solid var(--rbd);color:var(--red);padding:11px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
+
+/* ─── MESSAGE PANEL ─── */
+.mpanel{margin:12px 16px 0;background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.mphdr{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd)}
+.mptitle{font-size:13px;font-weight:700;font-family:var(--font-head);color:var(--ink)}
+.mpclose{background:none;color:var(--ink4);font-size:18px;cursor:pointer}
+.mitem{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.mitem:last-child{border-bottom:none}
+.mitem:active{background:var(--sf3)}
+.miname{font-size:13px;font-weight:600;color:var(--ink)}
+.mitrack{font-size:11px;color:var(--ink4);margin-top:2px}
+.mtbadge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0}
+.mtbadge.wa{background:var(--gbg);color:var(--green);border:1px solid var(--gbd)}
+.mtbadge.gm{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd)}
+
+/* ─── EDIT FORM ─── */
+.efm{padding:14px 16px;background:var(--sf);border-bottom:1.5px solid var(--bd)}
+
+/* ─── NOTES ─── */
+.nbox{margin:12px 16px;background:var(--gold-bg);border:1.5px solid var(--gold-bd);border-radius:var(--r);padding:12px}
+.nbox-lbl{font-size:10px;font-weight:700;color:var(--gold);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.nbox-txt{font-size:13px;color:var(--amber2);line-height:1.6}
+
+/* ─── ERRORS / EMPTY ─── */
+.errbox{background:var(--rbg);border:1.5px solid var(--rbd);color:var(--red);border-radius:10px;padding:10px 13px;font-size:13px;margin-bottom:12px}
+.empty{text-align:center;padding:64px 20px;color:var(--ink4)}
+.ei{font-size:48px;margin-bottom:12px;opacity:.5}
+.et{font-family:var(--font-head);font-size:16px;font-weight:700;color:var(--ink3);margin-bottom:6px}
+.es{font-size:13px;line-height:1.5}
+
+/* ─── TEMPLATES ─── */
+.tpl-page-hdr{padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:center}
+.tpl-page-hdr h2{font-family:var(--font-head);font-size:17px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+.tpl-add-btn{background:var(--dark);color:var(--gold2);padding:7px 15px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:none}
+.tpl-hint{margin:0 16px 14px;background:var(--gold-bg);border:1px solid var(--gold-bd);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--ink3);line-height:1.7}
+.tpl-hint code{background:rgba(184,134,11,.12);color:var(--amber2);padding:2px 6px;border-radius:4px;font-size:11px;font-family:monospace}
+.tpl-list{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
+.tpl-card{background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.tpl-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:13px 14px 0}
+.tpl-card-name{font-weight:700;font-size:14px;font-family:var(--font-head);color:var(--ink)}
+.tpl-card-meta{font-size:11px;color:var(--ink4);margin-top:2px}
+.tpl-card-preview{padding:8px 14px 11px;font-size:12px;color:var(--ink3);line-height:1.5;white-space:pre-wrap;word-break:break-word;border-top:1px solid var(--bd);margin-top:9px;max-height:72px;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,black 30%,transparent 100%)}
+.tpl-card-actions{display:flex;gap:8px;padding:8px 14px;border-top:1px solid var(--bd);background:var(--bg2)}
+.tpl-act-btn{flex:1;padding:8px 6px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;border:none;transition:opacity .15s}
+.tpl-act-btn.edit{background:var(--gold-bg);color:var(--gold)}.tpl-act-btn.del{background:var(--rbg);color:var(--red)}
+.prev-wrap{margin-bottom:13px}
+.prev-lbl{font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.prev-box{background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:11px 13px;font-size:12px;color:var(--ink3);line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto}
+.sdiv{margin:12px 0;border:none;border-top:1.5px solid var(--bd)}
+
+/* ─── CREATION LOADING OVERLAY ─── */
+#creating-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg);
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:0;
+}
+#creating-overlay.show{display:flex}
+.co-logo{
+  width:64px;height:64px;border-radius:18px;
+  background:var(--dark);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-weight:800;font-size:28px;
+  color:var(--gold2);margin-bottom:32px;
+  box-shadow:0 8px 32px rgba(26,18,8,.2);
+  animation:co-pulse 1.6s ease-in-out infinite;
+}
+@keyframes co-pulse{0%,100%{transform:scale(1);box-shadow:0 8px 32px rgba(26,18,8,.2)}50%{transform:scale(1.06);box-shadow:0 12px 40px rgba(26,18,8,.3)}}
+.co-title{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--ink);margin-bottom:8px;letter-spacing:-.4px}
+.co-subtitle{font-size:13px;color:var(--ink3);margin-bottom:36px;text-align:center;line-height:1.6;max-width:260px}
+.co-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:300px;margin-bottom:32px}
+.co-step{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;border-radius:12px;
+  background:var(--sf);border:1.5px solid var(--bd);
+  transition:all .3s;
+}
+.co-step.done{background:var(--gbg);border-color:var(--gbd)}
+.co-step.active{background:var(--gold-bg);border-color:var(--gold-bd)}
+.co-step-dot{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+  background:var(--bg2);color:var(--ink4);border:1.5px solid var(--bd);
+  transition:all .3s;
+}
+.co-step.done .co-step-dot{background:var(--green);color:#fff;border-color:var(--green);font-size:13px}
+.co-step.active .co-step-dot{background:var(--gold);color:#fff;border-color:var(--gold);animation:co-pulse 1s ease-in-out infinite}
+.co-step-txt{font-size:13px;font-weight:600;color:var(--ink3);transition:color .3s}
+.co-step.done .co-step-txt{color:var(--green)}
+.co-step.active .co-step-txt{color:var(--amber2)}
+.co-bar-wrap{width:100%;max-width:300px}
+.co-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--ink3);margin-bottom:6px;font-weight:600}
+.co-bar-track{height:6px;background:var(--bd);border-radius:3px;overflow:hidden}
+.co-bar-fill{height:100%;background:linear-gradient(90deg,var(--green2),var(--green));border-radius:3px;transition:width .4s ease;width:0%}
+
+/* ─── ANALYTICS PAGE ─── */
+.analytics-hero{
+  background:var(--dark);
+  padding:24px 18px 20px;
+  margin:16px 16px 0;
+  border-radius:18px;
+  border:1px solid var(--dark3);
+  position:relative;overflow:hidden;
+}
+.analytics-hero::after{
+  content:'';position:absolute;bottom:-30px;right:-20px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,134,11,.15),transparent 70%);
+}
+.analytics-hero-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.analytics-hero-num{font-family:var(--font-head);font-size:48px;font-weight:900;color:var(--gold2);line-height:1;font-style:italic;margin-bottom:4px}
+.analytics-hero-sub{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:16px}
+.analytics-hero-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+.analytics-hero-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green2));border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+.chart-section{padding:18px 16px 0}
+.chart-title{font-family:var(--font-head);font-size:15px;font-weight:800;color:var(--ink);margin-bottom:14px;letter-spacing:-.2px}
+
+/* STATUS DONUT */
+.donut-wrap{
+  background:var(--sf);border:1.5px solid var(--bd);border-radius:16px;
+  padding:18px;display:flex;align-items:center;gap:20px;
+  margin-bottom:12px;
+}
+.donut-svg{flex-shrink:0}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:9px}
+.donut-leg-item{display:flex;align-items:center;gap:9px}
+.donut-leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.donut-leg-label{font-size:12px;font-weight:600;color:var(--ink2);flex:1}
+.donut-leg-val{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--ink)}
+.donut-leg-pct{font-size:11px;color:var(--ink3);margin-left:2px}
+
+/* BAR CHART */
+.bar-chart-wrap{
+  background:var(--sf);border:1.5px solid var(--bd);border-radius:16px;
+  padding:18px;margin-bottom:12px;
+}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:11px;font-weight:600;color:var(--ink3);width:90px;flex-shrink:0;line-height:1.3;text-align:right}
+.bar-outer{flex:1;height:28px;background:var(--bg2);border-radius:8px;overflow:hidden;position:relative}
+.bar-inner{height:100%;border-radius:8px;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:700;color:#fff;min-width:28px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.bar-count{font-size:11px;font-weight:700;color:var(--ink3);width:28px;text-align:right;flex-shrink:0}
+
+/* ACTIVITY TIMELINE */
+.activity-wrap{
+  background:var(--sf);border:1.5px solid var(--bd);border-radius:16px;
+  padding:18px;margin-bottom:12px;overflow:hidden;
+}
+.activity-chart{display:flex;align-items:flex-end;gap:5px;height:80px;padding-bottom:0}
+.activity-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.activity-bar{
+  width:100%;border-radius:4px 4px 0 0;
+  background:var(--dark);
+  transition:height .6s cubic-bezier(.4,0,.2,1);
+  min-height:4px;position:relative;cursor:default;
+}
+.activity-bar:hover::after{
+  content:attr(data-tip);
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--dark);color:var(--gold2);font-size:10px;font-weight:700;
+  padding:3px 7px;border-radius:6px;white-space:nowrap;pointer-events:none;
+  font-family:var(--font-body);
+}
+.activity-month{font-size:9px;color:var(--ink4);font-weight:600;letter-spacing:.3px;text-transform:uppercase;text-align:center}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi-card{
+  background:var(--sf);border:1.5px solid var(--bd);border-radius:14px;
+  padding:15px 14px;
+}
+.kpi-label{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kpi-val{font-family:var(--font-head);font-size:26px;font-weight:800;color:var(--ink);font-style:italic;line-height:1}
+.kpi-sub{font-size:11px;color:var(--ink4);margin-top:4px}
+.kpi-good{color:var(--green)}.kpi-warn{color:var(--gold)}.kpi-bad{color:var(--red)}
+
+/* EMPTY ANALYTICS */
+.analytics-empty{text-align:center;padding:60px 20px;color:var(--ink4)}
+.analytics-empty .ei{font-size:48px;margin-bottom:14px;opacity:.4}
+.analytics-empty .et{font-family:var(--font-head);font-size:16px;color:var(--ink3);margin-bottom:6px}
+.analytics-empty .es{font-size:13px;line-height:1.5}
+
+@media(min-width:480px){
+  .modal-ov{align-items:center;padding:20px}
+  .modal-box{border-radius:20px;max-width:440px;margin:auto}
+  .stats-grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(max-width:360px){.sc-num{font-size:26px}}
+</style>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js">
+const firebaseConfig={apiKey:"AIzaSyA4InWsKlqdlu9bkXyFwkCru3coBrs7dEw",authDomain:"lifts-order-tracking.firebaseapp.com",projectId:"lifts-order-tracking"};
+firebase.initializeApp(firebaseConfig);
+firebase.auth().onAuthStateChanged(function(user){
+  if(user){document.getElementById("app").style.display="block";document.getElementById("loginScreen").style.display="none";}
+  else{document.getElementById("app").style.display="none";document.getElementById("loginScreen").style.display="flex";}
+});
+function googleLogin(){firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());}
+function logout(){firebase.auth().signOut();}
+</script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+<div id="loginScreen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#F7F0E6;font-family:sans-serif;">
+  <div style="font-size:40px;margin-bottom:16px">&#128274;</div>
+  <h1 style="font-size:26px;color:#1A1409;margin-bottom:8px;">Liftss</h1>
+  <p style="color:#7A6A50;margin-bottom:32px;">by ThinkWithSanketh</p>
+  <button onclick="googleLogin()" style="padding:14px 28px;background:#C9973A;color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;">Sign in with Google</button>
+</div>
+<div id="app" style="display:none;">
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">L</div>
+    <div class="auth-title">LiftTrack</div>
+    <div class="auth-sub">Lift installation workflow management.<br>Sign in to sync your orders across every device.</div>
+    <div class="auth-divider">continue with</div>
+    <button class="google-btn" id="google-signin-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-loading" id="auth-loading"><div class="spinner"></div>Signing you in…</div>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-footer">Data is securely stored in the cloud<br>and syncs instantly across all your devices.</div>
+  </div>
+</div>
+
+
+
+
+<div class="sync-bar" id="sync-bar"></div>
+
+<!-- USER MENU -->
+<div class="user-menu" id="user-menu">
+  <div class="user-menu-name" id="um-name">User<span class="user-menu-email" id="um-email"></span></div>
+  <button class="user-menu-btn" id="signout-btn">Sign out</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <header class="hdr" id="main-hdr">
+    <div class="hdr-logo">L</div>
+    <span class="hdr-title">LiftTrack</span>
+    <div id="hdr-right"></div>
+  </header>
+
+  <div class="page active" id="pg-dash">
+    <div class="stats-grid">
+      <div class="sc blue"><div class="sc-icon">📋</div><div class="sc-num" id="st-act">—</div><div class="sc-lbl">Active Orders</div></div>
+      <div class="sc red"><div class="sc-icon">🚫</div><div class="sc-num" id="st-blk">—</div><div class="sc-lbl">Blocked</div></div>
+      <div class="sc amber"><div class="sc-icon">🏁</div><div class="sc-num" id="st-hov">—</div><div class="sc-lbl">For Handover</div></div>
+      <div class="sc green"><div class="sc-icon">✅</div><div class="sc-num" id="st-cmp">—</div><div class="sc-lbl">Completed</div></div>
+    </div>
+    <div class="ftabs" id="ftabs">
+      <button class="ftab active" data-f="ALL">All</button>
+      <button class="ftab" data-f="NEW">New</button>
+      <button class="ftab" data-f="IN PROGRESS">Active</button>
+      <button class="ftab" data-f="BLOCKED">Blocked</button>
+      <button class="ftab" data-f="READY FOR HANDOVER">Handover</button>
+      <button class="ftab" data-f="COMPLETED">Completed</button>
+    </div>
+    <div class="olist" id="olist"></div>
+    <button class="fab" id="fab">+</button>
+  </div>
+
+  <div class="page" id="pg-det"></div>
+
+  <div class="page" id="pg-tpl">
+    <div class="tpl-page-hdr"><h2>Message Templates</h2><button class="tpl-add-btn" onclick="openTplEditor(null)">+ New</button></div>
+    <div class="tpl-hint">Use placeholders — auto-filled when sending:<br><code>{Customer_Name}</code>&nbsp;&nbsp;<code>{Order_ID}</code>&nbsp;&nbsp;<code>{Pending_Stage}</code></div>
+    <div class="tpl-list" id="tpl-list"></div>
+  </div>
+
+  <div class="page" id="pg-analytics">
+    <div id="analytics-content"></div>
+  </div>
+
+  <nav class="bnav" id="bnav">
+    <button class="bnav-btn active" data-pg="pg-dash" onclick="navTo('pg-dash')"><div class="bnav-icon-wrap"><span class="bnav-icon">🏠</span></div>Orders</button>
+    <button class="bnav-btn" data-pg="pg-analytics" onclick="navTo('pg-analytics')"><div class="bnav-icon-wrap"><span class="bnav-icon">📊</span></div>Analytics</button>
+    <button class="bnav-btn" data-pg="pg-tpl" onclick="navTo('pg-tpl')"><div class="bnav-icon-wrap"><span class="bnav-icon">💬</span></div>Templates</button>
+  </nav>
+</div>
+
+<!-- CREATE ORDER MODAL -->
+<div class="modal-ov" id="m-create">
+  <div class="modal-box">
+    <div class="modal-title">New Installation Order <button class="modal-close" onclick="closeM('m-create')">✕</button></div>
+    <div id="ce"></div>
+    <div class="fg"><label class="flbl">Customer Name *</label><input class="finp" id="fn" placeholder="e.g. Greenfield Towers" type="text"/></div>
+    <div class="fg"><label class="flbl">Phone (WhatsApp)</label><input class="finp" id="fp" placeholder="+27 82 000 0000" type="tel"/></div>
+    <div class="fg"><label class="flbl">Email</label><input class="finp" id="fe" placeholder="customer@email.com" type="email"/></div>
+    <div class="fg"><label class="flbl">Project Type</label><input class="finp" id="ft" placeholder="e.g. 8-stop passenger lift" type="text"/></div>
+    <div class="fg"><label class="flbl">Expected Handover Date</label><input class="finp" id="fd" type="date"/></div>
+    <div class="fg"><label class="flbl">Notes</label><textarea class="finp" id="fno" rows="2" placeholder="Optional notes…"></textarea></div>
+    <button class="btn-pri" id="btn-create">Create Order &amp; Generate Workflow</button>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal-ov" id="m-tpl">
+  <div class="modal-box">
+    <div class="modal-title" id="tpl-mtitle">New Template <button class="modal-close" onclick="closeM('m-tpl')">✕</button></div>
+    <div id="tpl-err"></div>
+    <div class="fg"><label class="flbl">Template Name *</label><input class="finp" id="tpl-name" placeholder="e.g. Site Access Reminder" type="text"/></div>
+    <div class="fg">
+      <label class="flbl">Type *</label>
+      <select class="finp" id="tpl-type" onchange="onTTChange()">
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Gmail">Gmail / Email</option>
+      </select>
+    </div>
+    <div class="fg" id="tpl-sw" style="display:none">
+      <label class="flbl">Email Subject</label>
+      <input class="finp" id="tpl-subj" placeholder="e.g. Update on Order #{Order_ID}" type="text"/>
+    </div>
+    <div class="fg">
+      <label class="flbl">Related Track (optional)</label>
+      <select class="finp" id="tpl-track">
+        <option value="">— General (any track) —</option>
+        <option>Sales &amp; Order</option><option>Payment</option><option>Civil Readiness</option>
+        <option>Material Management</option><option>Electrical Preparation</option><option>Installation</option>
+        <option>Testing &amp; Inspection</option><option>Handover</option><option>Post-Handover</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="flbl">Message Body *</label>
+      <textarea class="finp" id="tpl-body" rows="7" placeholder="Hello {Customer_Name},&#10;&#10;Regarding Order #{Order_ID}..." oninput="updPrev()"></textarea>
+    </div>
+    <div class="prev-wrap">
+      <div class="prev-lbl">Live Preview (sample values)</div>
+      <div class="prev-box" id="tpl-prev">Start typing above…</div>
+    </div>
+    <hr class="sdiv"/>
+    <button class="btn-pri" onclick="saveTpl()">Save Template</button>
+    <button class="btn-sec" onclick="closeM('m-tpl')">Cancel</button>
+    <button class="btn-danger" id="tpl-delbtn" onclick="deleteCurTpl()" style="display:none">🗑 Delete This Template</button>
+  </div>
+</div>
+
+<!-- FIREBASE SDKs (CDN) -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getFirestore, doc, collection, addDoc, setDoc, getDoc, getDocs,
+  updateDoc, deleteDoc, writeBatch, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// ─── Firebase Config ───
+const firebaseConfig = {
+  apiKey: "AIzaSyA4InWsKlqdlu9bkXyFwkCru3coBrs7dEw",
+  authDomain: "lifts-order-tracking.firebaseapp.com",
+  projectId: "lifts-order-tracking",
+  storageBucket: "lifts-order-tracking.firebasestorage.app",
+  messagingSenderId: "836886920660",
+  appId: "1:836886920660:web:7e77fe9d0d432cb7cb6a41"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// ════════════════════════════════════════════════
+//  CONSTANTS
+// ════════════════════════════════════════════════
+const S = {NS:'Not Started', IP:'In Progress', BL:'Blocked', CO:'Completed'};
+
+const WF = [
+  {n:'Sales & Order',o:1,m:1,s:['Initial inquiry received','Site survey scheduled','Site survey completed','Quotation prepared','Quotation sent to customer','Quotation approved by customer','Purchase order received','Order confirmation sent','Contract signed']},
+  {n:'Payment',o:2,m:1,s:['Down payment invoice sent','Down payment received','Down payment confirmed','Progress payment schedule agreed','Progress payment 1 invoiced','Progress payment 1 received','Final payment invoiced','Final payment received','Payment cleared by accounts']},
+  {n:'Civil Readiness',o:3,m:1,s:['Civil drawings reviewed','Shaft dimensions verified','Pit depth confirmed','Headroom clearance confirmed','Machine room / MRL space confirmed','Civil works started by client','Shaft brickwork completed','Pit waterproofing completed','Final civil inspection done','Civil readiness sign-off obtained']},
+  {n:'Material Management',o:4,m:1,s:['Bill of materials prepared','Purchase orders raised to suppliers','Equipment delivery date confirmed','Controller panel received','Cabin & doors received','Guide rails received','Drive & motor received','All materials received and checked','Materials staged at site']},
+  {n:'Electrical Preparation',o:5,m:1,s:['Electrical drawings reviewed','Dedicated lift supply confirmed','Incoming cable size verified','DB board space confirmed','Earthing and bonding plan approved','Electrical supply installed by client','Supply tested and certified','Lighting and socket in pit installed','Intercom cabling routed']},
+  {n:'Installation',o:6,m:1,s:['Installation team allocated','Installation start date confirmed','Scaffolding / access arranged','Guide rails installed','Sling and car frame installed','Cabin panels installed','Doors and landing fixtures installed','Machine / drive unit installed','Controller panel wired','Safety circuit completed','Roping / belt completed','Installation sign-off by supervisor']},
+  {n:'Testing & Inspection',o:7,m:1,s:['Pre-inspection checklist completed','No-load test run done','Full-load test run done','Safety gear test done','Buffer test done','Speed governor test done','Door safety test done','Emergency stop test done','Intercom test done','Third-party inspection booked','Third-party inspection passed','Certificate of compliance obtained']},
+  {n:'Handover',o:8,m:1,s:['Handover date confirmed with customer','Customer training scheduled','Customer training completed','Operating manuals handed over','Warranty documents handed over','Maintenance schedule explained','Snag list resolved','Customer acceptance form signed','Handover complete']},
+  {n:'Post-Handover',o:9,m:0,s:['30-day follow-up call done','First maintenance service scheduled','First maintenance service completed','Customer satisfaction survey sent','Survey response received','Any warranty claims logged','Warranty claims resolved']}
+];
+
+const DFLT_TPLS = [
+  {name:'Installation Start Notification',track:'Installation',type:'WhatsApp',subject:'',body:'Hello {Customer_Name},\n\nWe are pleased to inform you that the installation of your lift (Order #{Order_ID}) is scheduled to begin shortly.\n\nOur team will be on-site as per the agreed schedule. Please ensure site access is available.\n\nThank you for choosing our services.'},
+  {name:'Civil Readiness Request',track:'Civil Readiness',type:'WhatsApp',subject:'',body:'Hello {Customer_Name},\n\nRegarding your lift installation (Order #{Order_ID}), the following civil item is currently pending:\n\n{Pending_Stage}\n\nTimely completion is critical to keeping your installation on schedule.\n\nPlease update us on the expected completion date.\n\nThank you.'},
+  {name:'Payment Follow-Up',track:'Payment',type:'WhatsApp',subject:'',body:'Hello {Customer_Name},\n\nFriendly reminder regarding Order #{Order_ID}.\n\nThe following payment milestone is pending:\n\n{Pending_Stage}\n\nPlease arrange payment at your earliest convenience to avoid delays.\n\nThank you.'},
+  {name:'Handover Invitation',track:'Handover',type:'Gmail',subject:'Lift Handover \u2013 Order #{Order_ID} \u2013 {Customer_Name}',body:'Dear {Customer_Name},\n\nYour lift installation (Order #{Order_ID}) is now complete and ready for formal handover.\n\nWe would like to schedule a session to:\n- Walk you through the operation of your new lift\n- Hand over all documentation and warranties\n- Complete the customer acceptance sign-off\n\nPlease reply with your preferred date and time.\n\nWarm regards,\nThe Installation Team'},
+  {name:'Third-Party Inspection Notice',track:'Testing & Inspection',type:'Gmail',subject:'Lift Inspection Scheduled \u2013 Order #{Order_ID}',body:'Dear {Customer_Name},\n\nThe third-party inspection for your lift installation (Order #{Order_ID}) has been scheduled.\n\nPlease ensure the site is accessible on the inspection date.\n\nWe will notify you of the outcome promptly.\n\nKind regards,\nThe Installation Team'},
+  {name:'General Status Update',track:'',type:'WhatsApp',subject:'',body:'Hello {Customer_Name},\n\nQuick update on your lift installation (Order #{Order_ID}).\n\nCurrent pending item:\n{Pending_Stage}\n\nWe are working to progress this as soon as possible.\n\nThank you for your patience.'}
+];
+
+// ════════════════════════════════════════════════
+//  IN-MEMORY CACHE
+//  Source of truth for the UI. Firestore is synced in background.
+// ════════════════════════════════════════════════
+const MEM = { orders: {}, templates: [] };
+
+// ─── Firestore refs ───
+function uid()          { return window._uid; }
+function ordRef(oid)    { return doc(db, 'users', uid(), 'orders', oid); }
+function ordersCol()    { return collection(db, 'users', uid(), 'orders'); }
+function tplRef(tid)    { return doc(db, 'users', uid(), 'templates', tid); }
+function tplsCol()      { return collection(db, 'users', uid(), 'templates'); }
+
+// ─── Sync bar ───
+let _pendingSaves = 0;
+function syncStart() {
+  _pendingSaves++;
+  document.getElementById('sync-bar').className = 'sync-bar active';
+}
+function syncDone() {
+  _pendingSaves = Math.max(0, _pendingSaves - 1);
+  if (_pendingSaves === 0) {
+    const b = document.getElementById('sync-bar');
+    b.className = 'sync-bar done';
+    setTimeout(() => { if (_pendingSaves === 0) b.className = 'sync-bar'; }, 600);
+  }
+}
+
+// ─── Push one order to Firestore ───
+// Retries up to 3 times. Shows visible error if all fail.
+function cloudSave(oid) {
+  const o = MEM.orders[oid];
+  if (!o || !uid()) return;
+  syncStart();
+  const { id, ...data } = o;
+  const ref = doc(db, 'users', uid(), 'orders', oid);
+  const attempt = (tries) => {
+    setDoc(ref, data)
+      .then(() => { syncDone(); })
+      .catch(err => {
+        console.error('cloudSave error:', err.code, err.message);
+        if (tries > 1) {
+          setTimeout(() => attempt(tries - 1), 2000);
+        } else {
+          syncDone();
+          showSyncError('Save failed: ' + (err.code || err.message));
+        }
+      });
+  };
+  attempt(3);
+}
+
+function showSyncError(msg) {
+  let el = document.getElementById('sync-err-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-err-banner';
+    el.style.cssText = 'position:fixed;bottom:80px;left:16px;right:16px;background:#8b1a1a;color:#fff;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:999;text-align:center;';
+    document.body.appendChild(el);
+  }
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  setTimeout(() => { if(el) el.style.display = 'none'; }, 6000);
+}
+
+// ════════════════════════════════════════════════
+//  STATUS CALCULATION (pure JS, no network)
+// ════════════════════════════════════════════════
+function calcTrack(stages) {
+  if (!stages.length) return { status: S.NS, progress: 0 };
+  const co = stages.filter(s => s.status === S.CO).length;
+  const bl = stages.some(s => s.status === S.BL);
+  const ip = stages.some(s => s.status === S.IP);
+  const p  = Math.round(co / stages.length * 100);
+  let st = S.NS;
+  if (bl) st = S.BL;
+  else if (co === stages.length) st = S.CO;
+  else if (ip || co > 0) st = S.IP;
+  return { status: st, progress: p };
+}
+
+function calcOrder(tracks) {
+  const m  = tracks.filter(t => t.is_mandatory);
+  if (!m.length) return { status: 'NEW', progress: 0 };
+  const bl = m.flatMap(t => t.stages).some(s => s.status === S.BL);
+  const ap = Math.round(m.reduce((a, t) => a + t.track_progress, 0) / m.length);
+  if (bl) return { status: 'BLOCKED', progress: ap };
+  const sl = tracks.find(t => t.track_name === 'Sales & Order');
+  const ns = m.filter(t => t.track_name !== 'Sales & Order');
+  if (sl && ns.every(t => t.track_status === S.NS)) return { status: 'NEW', progress: ap };
+  if (m.every(t => t.track_status === S.CO)) return { status: 'COMPLETED', progress: 100 };
+  const hv = m.find(t => t.track_name === 'Handover');
+  if (m.filter(t => t.track_name !== 'Handover').every(t => t.track_status === S.CO) && hv && hv.track_status !== S.CO)
+    return { status: 'READY FOR HANDOVER', progress: ap };
+  return { status: 'IN PROGRESS', progress: ap };
+}
+
+function recalc(tracks) {
+  for (const t of tracks) {
+    const r = calcTrack(t.stages);
+    t.track_status = r.status;
+    t.track_progress = r.progress;
+  }
+  return calcOrder(tracks);
+}
+
+// ════════════════════════════════════════════════
+//  STARTUP — load cloud data into memory
+// ════════════════════════════════════════════════
+async function initData() {
+  try {
+    // Load orders
+    const snap = await getDocs(ordersCol());
+    MEM.orders = {};
+    snap.docs.forEach(d => { MEM.orders[d.id] = { id: d.id, ...d.data() }; });
+
+    // Load / seed templates
+    const tSnap = await getDocs(tplsCol());
+    if (tSnap.empty) {
+      const batch = writeBatch(db);
+      MEM.templates = [];
+      DFLT_TPLS.forEach(t => {
+        const ref = doc(tplsCol());
+        batch.set(ref, t);
+        MEM.templates.push({ id: ref.id, ...t });
+      });
+      await batch.commit();
+    } else {
+      MEM.templates = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    console.log('✅ Cloud data loaded:', Object.keys(MEM.orders).length, 'orders,', MEM.templates.length, 'templates');
+  } catch (e) {
+    console.error('❌ Cloud init failed:', e.code, e.message);
+    // Show the actual error so we can diagnose
+    showSyncError('Cloud load failed: ' + (e.code || e.message) + '. Check Firestore rules.');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  CRUD — instant memory update + background cloud save
+// ════════════════════════════════════════════════
+
+// Generate a clean Firestore-compatible ID
+function newId() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let id = '';
+  for (let i = 0; i < 20; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
+
+function createOrder(d) {
+  const oid = newId();
+  const tracks = WF.map(w => ({
+    id: newId(),
+    track_name: w.n, display_order: w.o, is_mandatory: w.m ? 1 : 0,
+    track_status: S.NS, track_progress: 0,
+    stages: w.s.map((sn, j) => ({ id: newId(), stage_name: sn, status: S.NS, display_order: j + 1 }))
+  }));
+  const os = recalc(tracks);
+  MEM.orders[oid] = {
+    id: oid,
+    customer_name: d.customer_name.trim(), phone: d.phone || '', email: d.email || '',
+    project_type: d.project_type || '', notes: d.notes || '',
+    expected_handover_date: d.expected_handover_date || '',
+    created_date: new Date().toISOString(),
+    overall_status: os.status, overall_progress: os.progress,
+    is_archived: false, tracks
+  };
+  cloudSave(oid);  // async, non-blocking
+  return oid;
+}
+
+function getOrdFull(oid) {
+  const o = MEM.orders[oid];
+  if (!o) return null;
+  // Return deep clone so mutations don't corrupt cache
+  const tracks = JSON.parse(JSON.stringify(o.tracks || []))
+    .sort((a, b) => a.display_order - b.display_order)
+    .map(t => ({ ...t, stages: (t.stages || []).sort((a, b) => a.display_order - b.display_order) }));
+  const { tracks: _, ...orderFields } = o;
+  return { order: { ...orderFields }, tracks };
+}
+
+function _mutate(oid, fn) {
+  const o = MEM.orders[oid];
+  if (!o) return;
+  fn(o);
+  const os = recalc(o.tracks);
+  o.overall_status = os.status;
+  o.overall_progress = os.progress;
+  cloudSave(oid);
+}
+
+function updStage(oid, tid, sid, st) {
+  _mutate(oid, o => {
+    const t = o.tracks.find(t => t.id === tid);
+    if (t) { const s = t.stages.find(s => s.id === sid); if (s) s.status = st; }
+  });
+}
+
+function delStage(oid, tid, sid) {
+  _mutate(oid, o => {
+    const t = o.tracks.find(t => t.id === tid);
+    if (t) t.stages = t.stages.filter(s => s.id !== sid);
+  });
+}
+
+function addStage(oid, tid, nm) {
+  _mutate(oid, o => {
+    const t = o.tracks.find(t => t.id === tid);
+    if (t) {
+      const mx = t.stages.reduce((m, s) => Math.max(m, s.display_order || 0), 0);
+      t.stages.push({ id: newId(), stage_name: nm.trim(), status: S.NS, display_order: mx + 1 });
+    }
+  });
+}
+
+function addTrack(oid, nm, mandatory) {
+  _mutate(oid, o => {
+    const mx = o.tracks.reduce((m, t) => Math.max(m, t.display_order || 0), 0);
+    o.tracks.push({ id: newId(), track_name: nm.trim(), display_order: mx + 1, is_mandatory: mandatory ? 1 : 0, track_status: S.NS, track_progress: 0, stages: [] });
+  });
+}
+
+function delTrack(oid, tid) {
+  _mutate(oid, o => { o.tracks = o.tracks.filter(t => t.id !== tid); });
+}
+
+function updOrd(oid, d) {
+  const o = MEM.orders[oid];
+  if (!o) return;
+  Object.assign(o, d);
+  cloudSave(oid);
+}
+
+function archOrd(oid) {
+  const o = MEM.orders[oid];
+  if (!o) return;
+  o.is_archived = true;
+  cloudSave(oid);
+}
+
+function getAllOrds() {
+  return Object.values(MEM.orders)
+    .filter(o => !o.is_archived)
+    .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
+    .map(o => { const { tracks, ...rest } = o; return rest; });
+}
+
+function dupOrd(oid) {
+  const o = MEM.orders[oid];
+  if (!o) return null;
+  const noid = newId();
+  const tracks = JSON.parse(JSON.stringify(o.tracks || [])).map(t => ({
+    ...t, id: newId(), track_status: S.NS, track_progress: 0,
+    stages: t.stages.map(s => ({ ...s, id: newId(), status: S.NS }))
+  }));
+  const nos = recalc(tracks);
+  MEM.orders[noid] = {
+    id: noid, customer_name: o.customer_name + ' (Copy)',
+    phone: o.phone || '', email: o.email || '', project_type: o.project_type || '',
+    notes: o.notes || '', expected_handover_date: o.expected_handover_date || '',
+    created_date: new Date().toISOString(),
+    overall_status: nos.status, overall_progress: nos.progress,
+    is_archived: false, tracks
+  };
+  cloudSave(noid);
+  return noid;
+}
+
+// ─── Templates ───
+function getAllTpls() { return MEM.templates; }
+
+async function saveTplToCloud(obj) {
+  syncStart();
+  if (obj.id) {
+    // Update existing
+    const idx = MEM.templates.findIndex(t => t.id === obj.id);
+    if (idx !== -1) MEM.templates[idx] = { ...obj };
+    await setDoc(tplRef(obj.id), obj);
+  } else {
+    // Create new
+    const ref = doc(tplsCol());
+    obj.id = ref.id;
+    MEM.templates.push({ ...obj });
+    await setDoc(ref, obj);
+  }
+  syncDone();
+}
+
+async function deleteTpl(id) {
+  MEM.templates = MEM.templates.filter(t => t.id !== id);
+  syncStart();
+  await deleteDoc(tplRef(id));
+  syncDone();
+}
+
+// ════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════
+const authScreen = document.getElementById('auth-screen');
+const mainApp    = document.getElementById('app');
+const authErr    = document.getElementById('auth-error');
+const authLoading = document.getElementById('auth-loading');
+
+document.getElementById('google-signin-btn').addEventListener('click', async () => {
+  authErr.style.display = 'none';
+  authLoading.style.display = 'flex';
+  try { await signInWithPopup(auth, provider); }
+  catch (e) {
+    authLoading.style.display = 'none';
+    authErr.style.display = 'block';
+    authErr.textContent = e.message.includes('popup-closed') ? 'Sign-in cancelled.' : 'Sign-in failed. Try again.';
+  }
+});
+
+document.getElementById('signout-btn').addEventListener('click', async () => {
+  closeUserMenu();
+  MEM.orders = {}; MEM.templates = [];
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    window._uid = user.uid;
+    renderUserAvatar(user);
+    // Show app immediately with loading state
+    authLoading.style.display = 'none';
+    authScreen.style.display = 'none';
+    mainApp.style.display = 'flex';
+    renderLoadingDash();
+    // Load from cloud (Firestore offline cache makes this fast on repeat visits)
+    await initData();
+    loadDash();
+  } else {
+    authScreen.style.display = 'flex';
+    mainApp.style.display = 'none';
+    window._uid = null;
+  }
+});
+
+function renderUserAvatar(user) {
+  const right = document.getElementById('hdr-right');
+  if (user.photoURL) {
+    right.innerHTML = `<img class="hdr-user" src="${user.photoURL}" alt="" onclick="toggleUserMenu()"/>`;
+  } else {
+    const init = (user.displayName || user.email || 'U')[0].toUpperCase();
+    right.innerHTML = `<div class="hdr-user-init" onclick="toggleUserMenu()">${init}</div>`;
+  }
+  document.getElementById('um-name').childNodes[0].nodeValue = user.displayName || user.email;
+  document.getElementById('um-email').textContent = user.email || '';
+}
+
+window.toggleUserMenu = function () { document.getElementById('user-menu').classList.toggle('open'); };
+window.closeUserMenu  = function () { document.getElementById('user-menu').classList.remove('open'); };
+document.addEventListener('click', e => {
+  if (!document.getElementById('user-menu').contains(e.target) && !e.target.closest('#hdr-right'))
+    document.getElementById('user-menu').classList.remove('open');
+});
+
+// ════════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════════
+function osBadge(s) { return { NEW: 'b-NEW', 'IN PROGRESS': 'b-IP', BLOCKED: 'b-BL', 'READY FOR HANDOVER': 'b-RH', COMPLETED: 'b-CO' }[s] || 'b-NEW'; }
+function ssBadge(s) { return { 'Not Started': 'b-ns', 'In Progress': 'b-ip', Blocked: 'b-bl', Completed: 'b-co' }[s] || 'b-ns'; }
+function pClr(s)    { if (s === 'BLOCKED') return 'red'; if (s === 'COMPLETED') return 'green'; if (s === 'READY FOR HANDOVER') return 'amber'; if (s === 'IN PROGRESS') return 'blue'; return 'gray'; }
+function tClr(s)    { if (s === 'Blocked') return 'red'; if (s === 'Completed') return 'green'; if (s === 'In Progress') return 'blue'; return 'gray'; }
+function fDt(d)     { if (!d) return ''; try { return new Date(d + 'T00:00:00').toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } }
+function esc(s)     { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function rph(s, cn, oid, ps) { return s.replace(/{Customer_Name}/g, cn).replace(/{Order_ID}/g, oid).replace(/{Pending_Stage}/g, ps); }
+function prevRph(s) { return s.replace(/{Customer_Name}/g, 'Acme Corp').replace(/{Order_ID}/g, '42').replace(/{Pending_Stage}/g, 'Civil readiness sign-off'); }
+function showPg(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function openM(id)  { document.getElementById(id).classList.add('open'); try { document.getElementById(id).querySelector('.modal-box').scrollTop = 0; } catch (e) { } }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+window.closeM = closeM;
+
+// ════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════
+var curNav = 'pg-dash', curF = 'ALL', allO = [];
+
+window.navTo = function (pg) {
+  curNav = pg;
+  showPg(pg);
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.toggle('active', b.dataset.pg === pg));
+  const hdr   = document.getElementById('main-hdr');
+  const right = document.getElementById('hdr-right');
+  const rHtml = right ? right.outerHTML : '';
+  if (pg === 'pg-tpl') {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">Templates</span>${rHtml}`;
+    renderTplList();
+  } else if (pg === 'pg-analytics') {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">Analytics</span>${rHtml}`;
+    renderAnalytics();
+  } else {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">LiftTrack</span>${rHtml}`;
+    loadDash();
+  }
+  document.getElementById('bnav').style.display = 'flex';
+};
+
+function renderLoadingDash() {
+  document.getElementById('st-act').textContent = '…';
+  document.getElementById('st-blk').textContent = '…';
+  document.getElementById('st-hov').textContent = '…';
+  document.getElementById('st-cmp').textContent = '…';
+  document.getElementById('olist').innerHTML = '<div class="empty"><div class="ei">⏳</div><div class="et">Loading your orders…</div></div>';
+}
+
+function loadDash() {
+  allO = getAllOrds();
+  const s = { a: 0, b: 0, h: 0, c: 0 };
+  allO.forEach(o => {
+    if (o.overall_status === 'BLOCKED') s.b++;
+    else if (o.overall_status === 'COMPLETED') s.c++;
+    else if (o.overall_status === 'READY FOR HANDOVER') s.h++;
+    else s.a++;
+  });
+  document.getElementById('st-act').textContent = s.a;
+  document.getElementById('st-blk').textContent = s.b;
+  document.getElementById('st-hov').textContent = s.h;
+  document.getElementById('st-cmp').textContent = s.c;
+  renderOList();
+}
+window.loadDash = loadDash;
+
+function renderOList() {
+  const fl = curF === 'ALL' ? allO : allO.filter(o => o.overall_status === curF);
+  const el = document.getElementById('olist');
+  if (!fl.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">📋</div><div class="et">No orders here</div><div class="es">Tap + to create your first installation order</div></div>`;
+    return;
+  }
+  el.innerHTML = fl.map(o => {
+    const pt = Math.round(o.overall_progress || 0);
+    const pc = pClr(o.overall_status);
+    return `<div class="ocard" data-status="${esc(o.overall_status)}" onclick="openOrd('${o.id}')">
+      <div class="ocard-top">
+        <div>
+          <div class="oname">${esc(o.customer_name)}</div>
+          <div class="ometa">${esc(o.project_type || 'Lift Installation')}</div>
+        </div>
+        <span class="badge ${osBadge(o.overall_status)}">${esc(o.overall_status)}</span>
+      </div>
+      <div class="pw"><div class="pl"><span>Progress</span><span>${pt}%</span></div><div class="pt"><div class="pf ${pc}" style="width:${pt}%"></div></div></div>
+      ${o.expected_handover_date ? `<div class="ohand">📅 ${fDt(o.expected_handover_date)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('ftabs').addEventListener('click', e => {
+  const b = e.target.closest('.ftab');
+  if (!b) return;
+  document.querySelectorAll('.ftab').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  curF = b.dataset.f;
+  renderOList();
+});
+
+// ─── Create Order ───
+document.getElementById('fab').addEventListener('click', () => openM('m-create'));
+document.getElementById('m-create').addEventListener('click', e => { if (e.target === document.getElementById('m-create')) closeM('m-create'); });
+
+document.getElementById('btn-create').addEventListener('click', function () {
+  const nm  = document.getElementById('fn').value.trim();
+  const ce  = document.getElementById('ce');
+  if (!nm) { ce.innerHTML = '<div class="errbox">Customer name is required</div>'; return; }
+  ce.innerHTML = '';
+  this.disabled = true;
+  // Create instantly in memory + kick off cloud save
+  const oid = createOrder({
+    customer_name: nm,
+    phone: document.getElementById('fp').value,
+    email: document.getElementById('fe').value,
+    project_type: document.getElementById('ft').value,
+    expected_handover_date: document.getElementById('fd').value,
+    notes: document.getElementById('fno').value
+  });
+  // Clear form and close modal immediately
+  ['fn', 'fp', 'fe', 'ft', 'fno'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fd').value = '';
+  closeM('m-create');
+  this.disabled = false;
+  // Navigate to order detail instantly
+  openOrd(oid);
+});
+
+// ════════════════════════════════════════════════
+//  ORDER DETAIL
+// ════════════════════════════════════════════════
+var curOid = null;
+var selTid = null, showMsg = false, showEd = false, showAT = false;
+
+window.openOrd = function (oid) {
+  curOid = oid; selTid = null; showMsg = false; showEd = false; showAT = false;
+  renderDet();
+  showPg('pg-det');
+  document.getElementById('bnav').style.display = 'none';
+  document.getElementById('pg-det').scrollTop = 0;
+};
+
+window.goBack = function () {
+  showPg(curNav);
+  document.getElementById('bnav').style.display = 'flex';
+  const hdr   = document.getElementById('main-hdr');
+  const right = document.getElementById('hdr-right');
+  const rHtml = right ? right.outerHTML : '';
+  if (curNav === 'pg-tpl') {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">Templates</span>${rHtml}`;
+    renderTplList();
+  } else if (curNav === 'pg-analytics') {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">Analytics</span>${rHtml}`;
+    renderAnalytics();
+  } else {
+    hdr.innerHTML = `<div class="hdr-logo">L</div><span class="hdr-title" style="font-family:var(--font-head)">LiftTrack</span>${rHtml}`;
+    loadDash();
+  }
+};
+
+function renderDet() {
+  const d = getOrdFull(curOid);
+  if (!d) { window.goBack(); return; }
+  const o   = d.order;
+  const trs = d.tracks;
+  const pc  = pClr(o.overall_status);
+  const pt  = Math.round(o.overall_progress);
+  const hdr = document.getElementById('main-hdr');
+  const right = document.getElementById('hdr-right');
+  const rHtml = right ? right.outerHTML : '';
+  hdr.innerHTML = `<button class="back-btn" onclick="goBack()">‹ Back</button><span class="hdr-title" style="font-family:var(--font-head);font-size:15px">${esc(o.customer_name)}</span>${rHtml}`;
+
+  let h = '';
+
+  // Order header
+  h += `<div class="ohdr">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div>
+        <h1>${esc(o.customer_name)}</h1>
+        <div class="ometa2">${esc(o.project_type || 'Lift Installation')}</div>
+        ${o.phone  ? `<div class="ocontact">📞 ${esc(o.phone)}</div>`  : ''}
+        ${o.email  ? `<div class="ocontact">✉️ ${esc(o.email)}</div>`  : ''}
+        ${o.expected_handover_date ? `<div class="ocontact">📅 ${fDt(o.expected_handover_date)}</div>` : ''}
+      </div>
+      <span class="badge ${osBadge(o.overall_status)}">${esc(o.overall_status)}</span>
+    </div>
+    <div class="pw" style="margin-top:12px">
+      <div class="pl"><span>Overall Progress</span><span><b>${pt}%</b></span></div>
+      <div class="pt" style="height:7px"><div class="pf ${pc}" style="width:${pt}%"></div></div>
+    </div>
+    <div class="arow">
+      <button class="abtn edit" onclick="togEd()">✏️ Edit</button>
+      <button class="abtn msg"  onclick="togMsg()">💬 Message</button>
+      <button class="abtn dup"  onclick="hDup()">⧉ Copy</button>
+      <button class="abtn arch" onclick="hArch()">Archive</button>
+    </div>
+  </div>`;
+
+  // Edit form
+  if (showEd) {
+    h += `<div class="efm">
+      <div class="fg"><label class="flbl">Customer Name</label><input class="finp" id="ef-n" value="${esc(o.customer_name)}" type="text"/></div>
+      <div class="fg"><label class="flbl">Phone</label><input class="finp" id="ef-p" value="${esc(o.phone || '')}" type="tel"/></div>
+      <div class="fg"><label class="flbl">Email</label><input class="finp" id="ef-e" value="${esc(o.email || '')}" type="email"/></div>
+      <div class="fg"><label class="flbl">Project Type</label><input class="finp" id="ef-t" value="${esc(o.project_type || '')}" type="text"/></div>
+      <div class="fg"><label class="flbl">Expected Handover</label><input class="finp" id="ef-d" value="${esc(o.expected_handover_date || '')}" type="date"/></div>
+      <div class="fg"><label class="flbl">Notes</label><textarea class="finp" id="ef-no" rows="2">${esc(o.notes || '')}</textarea></div>
+      <div style="display:flex;gap:8px;margin-bottom:2px">
+        <button class="btn-pri" style="margin-top:0" onclick="saveEd()">Save Changes</button>
+        <button class="abtn arch" style="flex:0;padding:10px 14px" onclick="togEd()">Cancel</button>
+      </div>
+    </div>`;
+  }
+
+  // Message panel
+  if (showMsg) {
+    const ps   = trs.flatMap(t => t.stages).find(s => s.status !== S.CO);
+    const pss  = ps ? ps.stage_name : 'N/A';
+    const tpls = getAllTpls().slice().sort((a, b) => {
+      if (a.type === b.type) return (a.name || '').localeCompare(b.name || '');
+      return a.type === 'WhatsApp' ? -1 : 1;
+    });
+    h += `<div class="mpanel"><div class="mphdr"><span class="mptitle">Send Message</span><button class="mpclose" onclick="togMsg()">✕</button></div>`;
+    if (!tpls.length) {
+      h += `<div style="padding:16px;text-align:center;color:var(--ink3);font-size:13px">No templates yet.<br>Go to <b>Templates</b> tab to create one.</div>`;
+    } else {
+      tpls.forEach(t => {
+        const gm = t.type === 'Gmail';
+        const bd = rph(t.body || '', o.customer_name, curOid, pss);
+        let lk;
+        if (!gm) { const ph = (o.phone || '').replace(/\D/g, ''); lk = 'https://wa.me/' + ph + '?text=' + encodeURIComponent(bd); }
+        else { const sj = rph(t.subject || '', o.customer_name, curOid, pss); lk = 'mailto:' + (o.email || '') + '?subject=' + encodeURIComponent(sj) + '&body=' + encodeURIComponent(bd); }
+        h += `<a href="${esc(lk)}" target="_blank" class="mitem"><div><div class="miname">${esc(t.name)}</div>${t.track ? `<div class="mitrack">${esc(t.track)}</div>` : ''}</div><span class="mtbadge ${gm ? 'gm' : 'wa'}">${esc(t.type)}</span></a>`;
+      });
+    }
+    h += `</div>`;
+  }
+
+  if (o.notes) h += `<div class="nbox"><div class="nbox-lbl">Notes</div><div class="nbox-txt">${esc(o.notes)}</div></div>`;
+
+  h += `<div class="thdr"><h2>Workflow Tracks</h2><span style="font-size:11px;color:var(--ink3)">${trs.length} tracks · tap to manage</span></div>`;
+  h += `<div class="tscroll sh">`;
+  trs.forEach(t => {
+    const sc = selTid === t.id ? (t.track_status === 'Blocked' ? 'sel-bl' : t.track_status === 'Completed' ? 'sel-co' : 'sel') : '';
+    const tc = tClr(t.track_status);
+    const tp = Math.round(t.track_progress);
+    h += `<div class="tcard ${selTid === t.id ? 'sel ' : ''}${sc}" onclick="selTrk('${t.id}')">
+      <div class="tname">${esc(t.track_name)}${!t.is_mandatory ? `<span style="font-size:9px;color:var(--ink3);margin-left:4px">OPT</span>` : ''}</div>
+      <div class="pt"><div class="pf ${tc}" style="width:${tp}%"></div></div>
+      <div class="tpct"><span>${tp}%</span><span class="badge ${ssBadge(t.track_status)}" style="font-size:9px;padding:2px 5px">${esc(t.track_status)}</span></div>
+    </div>`;
+  });
+  h += `<div class="add-tcard" onclick="togAT()">+ Add Track</div></div>`;
+
+  if (showAT) {
+    h += `<div class="atform"><div class="atrow"><input class="finp" id="at-n" placeholder="Track name…" style="flex:1" type="text"/><button class="add-sbtn" onclick="subAT()">Add</button><button class="add-scan" onclick="togAT()">✕</button></div><div class="atchk"><input type="checkbox" id="at-m" checked/><label for="at-m">Mandatory (affects order progress)</label></div></div>`;
+  }
+
+  if (selTid) {
+    const trk = trs.find(t => t.id === selTid);
+    if (trk) {
+      h += `<div class="ssec"><div class="sshdr"><span class="sstitle">${esc(trk.track_name)}</span><button class="sdtrack" onclick="hDelTrk('${trk.id}')">🗑 Delete Track</button></div><div class="slist">`;
+      trk.stages.forEach((s, i) => {
+        const dc = { 'Not Started': 'ns', 'In Progress': 'ip', Blocked: 'bl', Completed: 'co' }[s.status] || 'ns';
+        h += `<div class="sitem ${s.status === 'Completed' ? 'done-row' : ''}">
+          <span class="snum">${i + 1}</span>
+          <span class="sdot ${dc}"></span>
+          <span class="stext ${s.status === 'Completed' ? 'done' : ''}">${esc(s.stage_name)}</span>
+          <select class="ssel" onchange="hStS('${trk.id}','${s.id}',this.value)">
+            <option ${s.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+            <option ${s.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+            <option ${s.status === 'Blocked'     ? 'selected' : ''}>Blocked</option>
+            <option ${s.status === 'Completed'   ? 'selected' : ''}>Completed</option>
+          </select>
+          <button class="sdel" onclick="hDelSt('${trk.id}','${s.id}')">✕</button>
+        </div>`;
+      });
+      h += `</div><div id="as-area"></div>
+        <button class="add-stg-btn" onclick="showASF('${trk.id}')">+ Add Stage</button>
+        </div>`;
+    }
+  }
+
+  document.getElementById('pg-det').innerHTML = h;
+}
+
+window.selTrk  = function (tid) { selTid = selTid === tid ? null : tid; renderDet(); if (selTid) setTimeout(() => { const el = document.querySelector('.ssec'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60); };
+window.hStS    = function (tid, sid, st) { updStage(curOid, tid, sid, st); renderDet(); };
+window.hDelSt  = function (tid, sid) { if (!confirm('Delete this stage?')) return; delStage(curOid, tid, sid); renderDet(); };
+window.showASF = function (tid) {
+  const a = document.getElementById('as-area');
+  if (!a) return;
+  a.innerHTML = `<div class="add-srow"><input class="add-sinp" id="as-inp" placeholder="Stage name…" type="text"/><button class="add-sbtn" onclick="subAS('${tid}')">Add</button><button class="add-scan" onclick="document.getElementById('as-area').innerHTML=''">✕</button></div>`;
+  const inp = document.getElementById('as-inp');
+  if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') subAS(tid); if (e.key === 'Escape') { const a = document.getElementById('as-area'); if (a) a.innerHTML = ''; } }); }
+};
+window.subAS   = function (tid) { const inp = document.getElementById('as-inp'); if (!inp || !inp.value.trim()) return; addStage(curOid, tid, inp.value); renderDet(); };
+window.hDelTrk = function (tid) { if (!confirm('Delete this track and all its stages?')) return; selTid = null; delTrack(curOid, tid); renderDet(); };
+window.togEd   = function () { showEd = !showEd; if (showEd) showMsg = false; renderDet(); };
+window.togMsg  = function () { showMsg = !showMsg; if (showMsg) showEd = false; renderDet(); };
+window.togAT   = function () { showAT = !showAT; renderDet(); };
+window.subAT   = function () {
+  const inp = document.getElementById('at-n');
+  const chk = document.getElementById('at-m');
+  if (!inp || !inp.value.trim()) return;
+  addTrack(curOid, inp.value, chk ? chk.checked : true);
+  showAT = false; renderDet();
+};
+window.saveEd  = function () {
+  const n = document.getElementById('ef-n');
+  if (!n || !n.value.trim()) { alert('Customer name is required'); return; }
+  updOrd(curOid, {
+    customer_name: n.value.trim(),
+    phone:    document.getElementById('ef-p').value,
+    email:    document.getElementById('ef-e').value,
+    project_type: document.getElementById('ef-t').value,
+    expected_handover_date: document.getElementById('ef-d').value,
+    notes:    document.getElementById('ef-no').value
+  });
+  showEd = false; renderDet();
+};
+window.hArch = function () { if (!confirm('Archive this order?')) return; archOrd(curOid); goBack(); };
+window.hDup  = function () { const nid = dupOrd(curOid); if (nid) { openOrd(nid); } };
+
+// ════════════════════════════════════════════════
+//  ANALYTICS
+// ════════════════════════════════════════════════
+function renderAnalytics() {
+  const el = document.getElementById('analytics-content');
+  const orders = getAllOrds();
+
+  if (!orders.length) {
+    el.innerHTML = `<div class="analytics-empty"><div class="ei">📊</div><div class="et">No data yet</div><div class="es">Create your first order to see analytics and charts here.</div></div>`;
+    return;
+  }
+
+  const total = orders.length;
+  const byStatus = { NEW: 0, 'IN PROGRESS': 0, BLOCKED: 0, 'READY FOR HANDOVER': 0, COMPLETED: 0 };
+  let totalProgress = 0, completedCount = 0, blockedCount = 0;
+  orders.forEach(o => {
+    byStatus[o.overall_status] = (byStatus[o.overall_status] || 0) + 1;
+    totalProgress += (o.overall_progress || 0);
+    if (o.overall_status === 'COMPLETED') completedCount++;
+    if (o.overall_status === 'BLOCKED') blockedCount++;
+  });
+  const avgProgress     = Math.round(totalProgress / total);
+  const completionRate  = Math.round(completedCount / total * 100);
+
+  // Activity by month (last 8 months)
+  const now = new Date();
+  const months = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ label: d.toLocaleDateString('en', { month: 'short' }), year: d.getFullYear(), month: d.getMonth(), count: 0 });
+  }
+  orders.forEach(o => {
+    if (!o.created_date) return;
+    const d = new Date(o.created_date);
+    const m = months.find(m => m.year === d.getFullYear() && m.month === d.getMonth());
+    if (m) m.count++;
+  });
+  const maxMonthCount = Math.max(...months.map(m => m.count), 1);
+
+  // Donut
+  const statusColors = { NEW: '#a89f92', 'IN PROGRESS': '#1a6b3c', BLOCKED: '#8b1a1a', 'READY FOR HANDOVER': '#b8860b', COMPLETED: '#2d9c5a' };
+  const statusLabels = { NEW: 'New', 'IN PROGRESS': 'In Progress', BLOCKED: 'Blocked', 'READY FOR HANDOVER': 'Handover Ready', COMPLETED: 'Completed' };
+  const donutEntries  = Object.entries(byStatus).filter(([, v]) => v > 0);
+  const r = 44, cx = 54, cy = 54, sw = 14, circ = 2 * Math.PI * r;
+  let offset = 0, donutSegs = '';
+  donutEntries.forEach(([status, count]) => {
+    const dash = count / total * circ;
+    donutSegs += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${statusColors[status] || '#ccc'}" stroke-width="${sw}" stroke-dasharray="${dash} ${circ - dash}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += dash;
+  });
+  const donutSVG    = `<svg class="donut-svg" width="108" height="108" viewBox="0 0 108 108"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bd)" stroke-width="${sw}"/>${donutSegs}<text x="${cx}" y="${cy - 6}" text-anchor="middle" font-family="var(--font-head)" font-size="18" font-weight="800" fill="var(--gold2)" font-style="italic">${total}</text><text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="9" fill="var(--ink4)" font-family="var(--font-body)" font-weight="600">ORDERS</text></svg>`;
+  const donutLegend = donutEntries.map(([s, c]) => `<div class="donut-leg-item"><div class="donut-leg-dot" style="background:${statusColors[s]}"></div><div class="donut-leg-label">${statusLabels[s]}</div><div><span class="donut-leg-val">${c}</span><span class="donut-leg-pct">(${Math.round(c / total * 100)}%)</span></div></div>`).join('');
+
+  // Progress bars by status
+  const statusBarColors = { NEW: '#a89f92', 'IN PROGRESS': '#1a6b3c', BLOCKED: '#8b1a1a', 'READY FOR HANDOVER': '#b8860b', COMPLETED: '#2d9c5a' };
+  const progressBars = Object.entries(byStatus).filter(([, v]) => v > 0).map(([status, count]) => {
+    const avg = Math.round(orders.filter(o => o.overall_status === status).reduce((a, o) => a + (o.overall_progress || 0), 0) / count);
+    return `<div class="bar-row"><div class="bar-label">${esc(statusLabels[status])}</div><div class="bar-outer"><div class="bar-inner" style="width:${Math.max(avg, 6)}%;background:${statusBarColors[status]}">${avg}%</div></div><div class="bar-count">${count}</div></div>`;
+  }).join('');
+
+  // Project types
+  const typeMap = {};
+  orders.forEach(o => { const t = o.project_type || 'Unspecified'; typeMap[t] = (typeMap[t] || 0) + 1; });
+  const topTypes = Object.entries(typeMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const maxTypeCount = topTypes[0]?.[1] || 1;
+  const typeBarColors = ['#1a6b3c', '#2d9c5a', '#b8860b', '#d4a017', '#7a4800'];
+  const typeBars = topTypes.map(([nm, cnt], i) => `<div class="bar-row"><div class="bar-label">${esc(nm.length > 18 ? nm.slice(0, 16) + '…' : nm)}</div><div class="bar-outer"><div class="bar-inner" style="width:${Math.round(cnt / maxTypeCount * 100)}%;background:${typeBarColors[i % 5]}">${cnt > 1 ? cnt : ''}</div></div><div class="bar-count">${cnt}</div></div>`).join('');
+
+  // Monthly activity
+  const actBars = months.map(m => {
+    const h = m.count > 0 ? Math.max(Math.round(m.count / maxMonthCount * 72), 8) : 4;
+    return `<div class="activity-bar-col"><div class="activity-bar" style="height:${h}px;opacity:${m.count > 0 ? 1 : 0.3}" data-tip="${m.count} order${m.count !== 1 ? 's' : ''}"></div><div class="activity-month">${m.label}</div></div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="analytics-hero">
+      <div class="analytics-hero-label">Overall Fleet Progress</div>
+      <div class="analytics-hero-num">${avgProgress}%</div>
+      <div class="analytics-hero-sub">${total} active order${total !== 1 ? 's' : ''} · ${completedCount} completed</div>
+      <div class="analytics-hero-bar"><div class="analytics-hero-fill" style="width:${avgProgress}%"></div></div>
+    </div>
+    <div class="chart-section"><div class="chart-title">Order Status Breakdown</div>
+      <div class="donut-wrap">${donutSVG}<div class="donut-legend">${donutLegend}</div></div></div>
+    <div class="chart-section"><div class="chart-title">New Orders by Month</div>
+      <div class="activity-wrap"><div class="activity-chart">${actBars}</div></div></div>
+    <div class="chart-section"><div class="chart-title">Average Progress by Status</div>
+      <div class="bar-chart-wrap"><div class="bar-chart">${progressBars}</div></div></div>
+    ${topTypes.length > 1 ? `<div class="chart-section"><div class="chart-title">Top Project Types</div><div class="bar-chart-wrap"><div class="bar-chart">${typeBars}</div></div></div>` : ''}
+    <div class="chart-section"><div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Completion Rate</div><div class="kpi-val ${completionRate > 50 ? 'kpi-good' : completionRate > 20 ? 'kpi-warn' : 'kpi-bad'}">${completionRate}%</div><div class="kpi-sub">${completedCount} of ${total} orders</div></div>
+      <div class="kpi-card"><div class="kpi-label">Blocked Orders</div><div class="kpi-val ${blockedCount === 0 ? 'kpi-good' : blockedCount < 3 ? 'kpi-warn' : 'kpi-bad'}">${blockedCount}</div><div class="kpi-sub">${blockedCount === 0 ? 'None blocked 🎉' : 'Needs attention'}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Avg Progress</div><div class="kpi-val">${avgProgress}%</div><div class="kpi-sub">Across all orders</div></div>
+      <div class="kpi-card"><div class="kpi-label">Handover Ready</div><div class="kpi-val ${byStatus['READY FOR HANDOVER'] > 0 ? 'kpi-warn' : 'kpi-good'}">${byStatus['READY FOR HANDOVER'] || 0}</div><div class="kpi-sub">${byStatus['READY FOR HANDOVER'] > 0 ? 'Awaiting handover' : 'All handled'}</div></div>
+    </div></div>
+    <div style="height:8px"></div>`;
+}
+
+// ════════════════════════════════════════════════
+//  TEMPLATES
+// ════════════════════════════════════════════════
+function renderTplList() {
+  const tpls = getAllTpls();
+  const el   = document.getElementById('tpl-list');
+  if (!tpls.length) { el.innerHTML = `<div class="empty"><div class="ei">💬</div><div class="et">No templates yet</div><div class="es">Tap "+ New" to create your first template</div></div>`; return; }
+  const sorted = tpls.slice().sort((a, b) => { if (a.type === b.type) return (a.name || '').localeCompare(b.name || ''); return a.type === 'WhatsApp' ? -1 : 1; });
+  el.innerHTML = sorted.map(t => {
+    const gm = t.type === 'Gmail';
+    return `<div class="tpl-card">
+      <div class="tpl-card-hdr"><div><div class="tpl-card-name">${esc(t.name)}</div><div class="tpl-card-meta">${t.track ? esc(t.track) : 'General'}</div></div><span class="mtbadge ${gm ? 'gm' : 'wa'}">${esc(t.type)}</span></div>
+      <div class="tpl-card-preview">${esc(prevRph(t.body || ''))}</div>
+      <div class="tpl-card-actions"><button class="tpl-act-btn edit" onclick="openTplEditor('${t.id}')">✏️ Edit</button><button class="tpl-act-btn del" onclick="qDelTpl('${t.id}','${esc(t.name)}')">🗑 Delete</button></div>
+    </div>`;
+  }).join('');
+}
+window.renderTplList = renderTplList;
+
+var etid = null;
+window.openTplEditor = function (id) {
+  etid = id;
+  document.getElementById('tpl-err').innerHTML = '';
+  if (id) {
+    const t = MEM.templates.find(t => t.id === id);
+    if (!t) return;
+    document.getElementById('tpl-mtitle').innerHTML = `Edit Template <button class="modal-close" onclick="closeM('m-tpl')">✕</button>`;
+    document.getElementById('tpl-name').value  = t.name    || '';
+    document.getElementById('tpl-type').value  = t.type    || 'WhatsApp';
+    document.getElementById('tpl-subj').value  = t.subject || '';
+    document.getElementById('tpl-track').value = t.track   || '';
+    document.getElementById('tpl-body').value  = t.body    || '';
+    document.getElementById('tpl-delbtn').style.display = 'block';
+  } else {
+    document.getElementById('tpl-mtitle').innerHTML = `New Template <button class="modal-close" onclick="closeM('m-tpl')">✕</button>`;
+    ['tpl-name','tpl-subj','tpl-body'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('tpl-type').value  = 'WhatsApp';
+    document.getElementById('tpl-track').value = '';
+    document.getElementById('tpl-delbtn').style.display = 'none';
+  }
+  onTTChange(); updPrev(); openM('m-tpl');
+};
+
+window.onTTChange = function () { document.getElementById('tpl-sw').style.display = document.getElementById('tpl-type').value === 'Gmail' ? 'block' : 'none'; updPrev(); };
+window.updPrev    = function () { const b = document.getElementById('tpl-body').value || ''; document.getElementById('tpl-prev').textContent = prevRph(b) || 'Start typing above…'; };
+
+window.saveTpl = async function () {
+  const nm = document.getElementById('tpl-name').value.trim();
+  const bd = document.getElementById('tpl-body').value.trim();
+  const er = document.getElementById('tpl-err');
+  if (!nm) { er.innerHTML = '<div class="errbox">Template name is required</div>'; return; }
+  if (!bd) { er.innerHTML = '<div class="errbox">Message body is required</div>'; return; }
+  er.innerHTML = '';
+  const obj = { name: nm, type: document.getElementById('tpl-type').value, subject: document.getElementById('tpl-subj').value.trim(), track: document.getElementById('tpl-track').value, body: bd };
+  if (etid) obj.id = etid;
+  await saveTplToCloud(obj);
+  closeM('m-tpl');
+  renderTplList();
+};
+
+window.deleteCurTpl = async function () {
+  if (!etid) return;
+  const t = MEM.templates.find(t => t.id === etid);
+  if (!confirm(`Delete template "${t ? t.name : ''}"?`)) return;
+  await deleteTpl(etid);
+  closeM('m-tpl');
+  renderTplList();
+};
+
+window.qDelTpl = async function (id, nm) {
+  if (!confirm(`Delete template "${nm}"?`)) return;
+  await deleteTpl(id);
+  renderTplList();
+};
+
+document.getElementById('m-tpl').addEventListener('click', e => { if (e.target === document.getElementById('m-tpl')) closeM('m-tpl'); });
+</script>
+</div>
+</body>
+</html>
